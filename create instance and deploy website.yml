@@ -1,0 +1,46 @@
+Resources:
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t3.medium
+      ImageId: ami-0947d2ba12ee1ff75
+      KeyName: ec2-instances
+      Tags:
+        - Key: Name
+          Value: HelloWorld Instance
+        - Key: Owner
+          Value: Sanket
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y # update existing packages
+          yum install -y httpd # install apache web server
+          systemctl start httpd
+          systemctl enable httpd
+          echo "Hello World" > /var/www/html/index.html
+      
+     DNS: 
+       Type: "AWS::Route53::HostedZone"
+       Properties: 
+       HostedZoneConfig: 
+         Comment: 'site for HelloWorld.com'
+         Name: 'HelloWorld.com'
+      VPCs: 
+      - 
+        VPCId: 'vpc-abcd1234'
+        VPCRegion: 'us-east-1a'
+      
+     HostedZoneTags: 
+      - 
+        Key: 'Website'
+        Value: 'Helloworld.com'
+    
+   myDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: Z3DG6IL3SJCGPX
+      Name: HelloWorld.com.
+      Type: SPF
+      TTL: '900'
+      ResourceRecords:
+        - 'ip4:instance ip'
